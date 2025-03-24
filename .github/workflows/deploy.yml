@@ -8,16 +8,22 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-    - name: SSH into Server and Deploy
-      uses: appleboy/ssh-action@v0.1.10
-      with:
-        host: ${{ secrets.SERVER_IP }}
-        username: ${{ secrets.SERVER_USER }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        script: |
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "${{ secrets.SERVER_IP }}" >> ~/.ssh/known_hosts
+
+      - name: Deploy to Server
+        run: |
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.SERVER_IP }} << 'EOF'
           cd /home/ubuntu/simple-CICD
           git pull origin main
-          npm install 
+          npm install
           npm start
+          EOF
