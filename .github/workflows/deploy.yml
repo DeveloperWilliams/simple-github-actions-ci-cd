@@ -1,29 +1,32 @@
-name: Deploy Node.js App
+name: Deploy to EC2
 
 on:
   push:
     branches:
-      - main  # Change to your deployment branch
+      - main  # Change if needed
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup SSH
+      - name: Set up SSH key
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H "${{ secrets.SERVER_IP }}" >> ~/.ssh/known_hosts
+          echo "${{ secrets.EC2_SSH_KEY }}" > server-1.pem
+          chmod 600 server-1.pem
 
-      - name: Deploy to Server
+      - name: Add EC2 server to known hosts
         run: |
-          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.SERVER_IP }} << 'EOF'
-          cd /home/ubuntu/simple-CICD
+          ssh-keyscan -H ec2-13-60-252-90.eu-north-1.compute.amazonaws.com >> ~/.ssh/known_hosts
+
+      - name: Connect to EC2 and deploy
+        run: |
+          ssh -i "server-1.pem" ubuntu@ec2-13-60-252-90.eu-north-1.compute.amazonaws.com << 'EOF'
+          cd /home/archy/simple-CICD 
           git pull origin main
           npm install
-          npm start
+          nmp start
           EOF
