@@ -20,6 +20,7 @@ jobs:
 
       - name: Add EC2 server to known hosts
         run: |
+          mkdir -p ~/.ssh
           ssh-keyscan -H ec2-13-60-252-90.eu-north-1.compute.amazonaws.com >> ~/.ssh/known_hosts
 
       - name: Connect to EC2 and deploy
