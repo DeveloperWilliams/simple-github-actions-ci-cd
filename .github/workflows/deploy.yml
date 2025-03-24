@@ -29,5 +29,5 @@ jobs:
           cd /home/ubuntu/simple-CICD 
           git pull origin main
           npm install
-          nmp start
+          npm start
           EOF
